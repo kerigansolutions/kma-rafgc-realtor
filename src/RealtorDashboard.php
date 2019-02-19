@@ -14,10 +14,9 @@ class RealtorDashboard
 
     public function enqueueAdmin()
     {
-
-        wp_register_style( 'am_admin_bootstrap', get_template_directory_uri() . '/assets/styles/app.css' );
+        wp_register_style( 'am_admin_bootstrap', get_template_directory_uri() . '/assets/styles/admin.css' );
+        // wp_register_style( 'am_admin_bootstrap', get_template_directory_uri() . '/assets/styles/app.css' );
         wp_enqueue_style( 'am_admin_bootstrap');
-        
     }
 
     public function addDashboardWidgets()
