@@ -29,7 +29,7 @@ class Search extends Mothership
 
         $this->searchParams = [
             'omni'   => '',
-            'sort' => 'date_modified|desc',
+            'sort' => 'list_date|desc',
             'status' => [
                 'active' => 'Active',
                 'contingent' => 'Contingent'
