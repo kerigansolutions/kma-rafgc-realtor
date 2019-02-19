@@ -4,12 +4,14 @@ namespace KeriganSolutions\KMARealtor;
 class RealtorListings extends Mothership
 {
     protected $realtorInfo;
+    public $realtorListings;
+    protected $dir;
 
     public function __construct($realtorInfo)
     {
         parent::__construct();
         $this->realtorInfo = $realtorInfo;
-
+        $this->dir = dirname(__FILE__);
         add_action( 'admin_menu', [$this, 'createListingsPage'] );
 
     }
@@ -27,6 +29,7 @@ class RealtorListings extends Mothership
 
     public function listingsPage()
     {
+        $listings = $this->getListingStats();
         include(wp_normalize_path($this->dir . '/templates/my-listings.php'));
     }
 
@@ -55,7 +58,7 @@ class RealtorListings extends Mothership
         return $response->data;
     }
 
-    public function getListingStats()
+    public function getListingStats($limit = -1)
     {
         if(!isset($this->realtorInfo['id'])){
             return false;
@@ -64,7 +67,9 @@ class RealtorListings extends Mothership
         $apiCall = parent::callApi('agent-listings/' . $this->realtorInfo['id'] . '?analytics=true&nostats=true');
         $response = json_decode($apiCall->getBody());
 
-        return $response->data;
+        $listings = (count($response->data) > $limit && $limit !== -1 ? array_slice($response->data,0,$limit) : $response->data); 
+
+        return $listings;
     }
 
 }

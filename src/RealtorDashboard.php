@@ -15,7 +15,6 @@ class RealtorDashboard
     public function enqueueAdmin()
     {
         wp_register_style( 'am_admin_bootstrap', get_template_directory_uri() . '/assets/styles/admin.css' );
-        // wp_register_style( 'am_admin_bootstrap', get_template_directory_uri() . '/assets/styles/app.css' );
         wp_enqueue_style( 'am_admin_bootstrap');
     }
 
@@ -85,7 +84,7 @@ class RealtorDashboard
         $statsSection = '';
         $impressions = 0;
         $clicks = 0;
-        foreach($listings->getListingStats() as $listing){
+        foreach($listings->getListingStats(5) as $listing){
             $impressions = $impressions + $listing->impressions;
             $clicks = $clicks + $listing->clicks;
             $statsSection .= '<div class="listing text-center">
@@ -113,6 +112,8 @@ class RealtorDashboard
         echo '</div>';
 
         echo $statsSection;
+        
+        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/index.php?page=my-listings.php" >All Active Listings</a></div>';
 
     }
 
