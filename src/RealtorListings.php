@@ -1,5 +1,5 @@
 <?php 
-namespace Includes\Modules\KMARealtor;
+namespace KeriganSolutions\KMARealtor;
 
 class RealtorListings extends Mothership
 {

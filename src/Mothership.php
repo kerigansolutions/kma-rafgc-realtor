@@ -1,5 +1,5 @@
 <?php 
-namespace Includes\Modules\KMARealtor;
+namespace KeriganSolutions\KMARealtor;
 
 use GuzzleHttp\Client;
 

@@ -1,6 +1,10 @@
 {
     "name": "kerigansolutions/kma-rafgc-realtor",
     "description": "RAFGC realtor package for KMA WP Sites",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+        "nesbot/carbon": "^1.22"
+    },
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -9,7 +13,6 @@
             "email": "bryan@kerigan.com"
         }
     ],
-    "require": {},
     "autoload": {
         "psr-4": {
             "KeriganSolutions\\KMARealtor\\": "src"

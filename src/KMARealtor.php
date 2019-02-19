@@ -1,6 +1,5 @@
 <?php
-
-namespace Includes\Modules\KMARealtor;
+namespace KeriganSolutions\KMARealtor;
 
 class KMARealtor
 {
