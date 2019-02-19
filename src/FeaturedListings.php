@@ -32,6 +32,11 @@ class FeaturedListings extends Mothership
     public function getListings($limit = -1)
     {
         $this->getFeaturedList($limit);
+
+        if(!is_array($this->featuredListings)){
+            return [];
+        }
+
         $apiCall = parent::callApi('listings?mlsNumbers=' . implode('|',$this->featuredListings));
         $response = json_decode($apiCall->getBody());
         return $response->data;
