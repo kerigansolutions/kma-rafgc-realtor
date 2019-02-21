@@ -11,9 +11,9 @@ class KMARealtor
             'id'          => get_field('agent_id','option'),
             'address'     => get_field('address','option'),
             'phone'       => get_field('phone','option'),
-            'photo'       => get_field('image','option'),
+            'photo'       => wp_get_attachment_image_url(get_field('agent_photo','option'),'medium'),
             'broker'      => get_field('broker_name','option'),
-            'broker_logo' => get_field('broker_logo','option')
+            'broker_logo' => wp_get_attachment_image_url(get_field('broker_logo','option'),'medium')
         ];
     }
 }

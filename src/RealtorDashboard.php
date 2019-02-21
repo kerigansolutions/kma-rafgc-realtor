@@ -80,11 +80,18 @@ class RealtorDashboard
     public function addListingsWidget()
     {
         $listings = new RealtorListings($this->realtorInfo);
-
+        $listingStats = $listings->getListingStats(5);
         $statsSection = '';
         $impressions = 0;
         $clicks = 0;
-        foreach($listings->getListingStats(5) as $listing){
+
+        if(!$listingStats){
+            echo '<p class="text-center mt-5">Add your MLS ID to see stats on your properties!</p>
+                    <p class="text-center pb-5"><a href="http://wprets.test/wordpress/wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
+            return;
+        }
+
+        foreach($listingStats as $listing){
             $impressions = $impressions + $listing->impressions;
             $clicks = $clicks + $listing->clicks;
             $statsSection .= '<div class="listing text-center">
@@ -119,20 +126,48 @@ class RealtorDashboard
 
     public function addInfoWidget()
     {
+        if($this->realtorInfo['name'] == '' && 
+            $this->realtorInfo['email'] == '' && 
+            $this->realtorInfo['phone'] == '' && 
+            $this->realtorInfo['broker'] == ''){
+            echo '<p class="text-center mt-5">Required information is missing from configuration!</p>
+                    <p class="text-center pb-5"><a href="http://wprets.test/wordpress/wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
+            return;
+        }
 
         echo '<div class="text-center">';
 
-        echo '<img src="'.$this->realtorInfo['photo']['url'].'" class="img-fluid img-thumbnail mt-4" width="250" >';
-        echo '<p class="display-4 mt-4 font-weight-bold">'.$this->realtorInfo['name'].'</p>';
-        echo '<p>'.$this->realtorInfo['email'].'</p>';
-        echo '<p>'.$this->realtorInfo['phone'].'</p>';
-        echo '<p>'.$this->realtorInfo['address'].'</p>';
-        echo '<p>'.$this->realtorInfo['broker'].'</p>';
-        echo '<img src="'.$this->realtorInfo['broker_logo']['url'].'" width="150" >';
+        if($this->realtorInfo['photo'] != ''){
+            echo '<img src="'.$this->realtorInfo['photo'].'" class="img-fluid img-thumbnail mt-4" width="250" >';
+        }
+
+        if($this->realtorInfo['name'] != ''){
+            echo '<p class="display-4 mt-4 font-weight-bold">'.$this->realtorInfo['name'].'</p>';
+        }
+
+        if($this->realtorInfo['email'] != ''){
+            echo '<p>'.$this->realtorInfo['email'].'</p>';
+        }
+
+        if($this->realtorInfo['phone'] != ''){
+            echo '<p>'.$this->realtorInfo['phone'].'</p>';
+        }
+
+        if($this->realtorInfo['address'] != ''){
+            echo '<p>'.$this->realtorInfo['address'].'</p>';
+        }
+
+        if($this->realtorInfo['broker'] != ''){
+            echo '<p>'.$this->realtorInfo['broker'].'</p>';
+        }
+
+        if($this->realtorInfo['broker_logo'] != ''){
+            echo '<img src="'.$this->realtorInfo['broker_logo'].'" width="150" >';
+        }
 
         echo '</div>';
 
-        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/admin.php?page=contact-info" >Edit</a></div>';
+        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/admin.php?page=contact-info" >Edit Information</a></div>';
 
     }
 
