@@ -7,10 +7,10 @@ class RealtorListings extends Mothership
     public $realtorListings;
     protected $dir;
 
-    public function __construct($realtorInfo)
+    public function __construct()
     {
         parent::__construct();
-        $this->realtorInfo = $realtorInfo;
+        $this->realtorInfo = KMARealtor::getRealtorInfo();
         $this->dir = dirname(__FILE__);
         add_action( 'admin_menu', [$this, 'createListingsPage'] );
 

@@ -5,9 +5,9 @@ class RealtorDashboard
 {
     protected $realtorInfo;
 
-    public function __construct($realtorInfo)
+    public function __construct()
     {
-        $this->realtorInfo = $realtorInfo;
+        $this->realtorInfo = KMARealtor::getRealtorInfo();
         add_action( 'wp_dashboard_setup', array( $this, 'addDashboardWidgets' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueueAdmin') );
     }
