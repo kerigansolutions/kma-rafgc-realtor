@@ -6,6 +6,9 @@ class RealtorListings extends Mothership
     protected $realtorInfo;
     public $realtorListings;
     protected $dir;
+    protected $searchParams;
+    protected $request;
+    protected $searchableParams;
 
     public function __construct()
     {
@@ -14,6 +17,64 @@ class RealtorListings extends Mothership
         $this->dir = dirname(__FILE__);
         add_action( 'admin_menu', [$this, 'createListingsPage'] );
 
+        $this->searchParams = [
+            'sort' => 'list_date|desc'
+        ];
+
+        $this->request = (isset($_GET['q']) ? $_GET : null);
+
+        $this->searchableParams = [
+            'sort',
+            'page'
+        ];
+    }
+
+    public function getSort()
+    {
+        return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'list_date|desc';
+    }
+
+    public function getCurrentRequest()
+    {
+        return json_encode($this->searchParams);
+    }
+
+    public function filterRequest()
+    {
+        if($this->request == null){
+            return false;
+        }
+        
+        foreach($this->request as $key => $var){
+            if(in_array($key, $this->searchableParams)){
+                $this->searchParams[$key] = $var;
+            }
+        }
+    }
+
+    public function makeRequest()
+    {
+        $this->filterRequest();
+
+        $request = '';
+        foreach($this->searchParams as $key => $var){
+            if(is_array($var)){
+                $request .= '&' . $key . '=';
+                $i = 1;
+                foreach($var as $k => $v){
+                    $request .= $v . ($i < count($var) ? '|' : '');
+                    $i++;
+                }
+            }else{
+                if($var != '' && $var != 'Any'){
+                    $request .= '&' . $key . '=' . $var;
+                }
+            }
+        }
+
+        // $request = $request . '&page=' . get_query_var( 'page' );
+        
+        return $request;
     }
 
     public function createListingsPage()
@@ -39,7 +100,7 @@ class RealtorListings extends Mothership
             return false;
         }
 
-        $apiCall = parent::callApi('agent-listings/' . $this->realtorInfo['id'] . ($hidestats ? '?nostats=true' : null));
+        $apiCall = parent::callApi('agent-listings/' . $this->realtorInfo['id'] . '?q=' . ($hidestats ? '&nostats=true' : null) . ($this->request ? $this->makeRequest() : null));
 
         $response = json_decode($apiCall->getBody());
 
