@@ -12,7 +12,7 @@ class Search extends Mothership
     {
         parent::__construct();
 
-        $this->request = (isset($_GET['q']) && $_GET['q'] == 'search' ? $_GET : null);
+        $this->request = (isset($_GET['q']) ? $_GET : null);
 
         $this->searchableParams = [
             'area',
@@ -57,7 +57,7 @@ class Search extends Mothership
 
     public function getSort()
     {
-        return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'date_modified|desc';
+        return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'list_date|desc';
     }
 
     public function filterRequest()
@@ -77,7 +77,7 @@ class Search extends Mothership
     {
         $this->filterRequest();
 
-        $request = '?q=search';
+        $request = '?q';
         foreach($this->searchParams as $key => $var){
             if(is_array($var)){
                 $request .= '&' . $key . '=';
@@ -104,11 +104,19 @@ class Search extends Mothership
         $response = json_decode($apiCall->getBody());
         $this->results = $response;
 
+        if(!isset($this->results->data)){
+            return false;
+        }
+
         return $this->results;
     }
 
     public function buildPagination()
     {
+        if(!isset($this->results->data)){
+            return false;
+        }
+        
         $pagination = new Pagination($this->getResultMeta(),$this->searchParams);
         return $pagination->buildPagination();
     }
