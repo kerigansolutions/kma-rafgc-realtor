@@ -62,7 +62,7 @@ class RealtorDashboard
             </div>';
         }
 
-        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/edit.php?post_status=publish&post_type=contact_request" >All Active Leads</a> &nbsp; <a class="px-2" href="/wordpress/wp-admin/edit.php?post_status=trash&post_type=contact_request" >All Archived Leads</a></div>';
+        echo '<div class="pt-2" ><hr><a class="px-2" href="'.get_home_path().'wp-admin/edit.php?post_status=publish&post_type=contact_request" >All Active Leads</a> &nbsp; <a class="px-2" href="'.get_home_path().'wp-admin/edit.php?post_status=trash&post_type=contact_request" >All Archived Leads</a></div>';
     }
 
     protected function getLeads($num = -1, $status = 'publish')
@@ -87,7 +87,7 @@ class RealtorDashboard
 
         if(!$listingStats){
             echo '<p class="text-center mt-5">Add your MLS ID to see stats on your properties!</p>
-                    <p class="text-center pb-5"><a href="http://wprets.test/wordpress/wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
+                    <p class="text-center pb-5"><a href="'.get_home_path().'wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
             return;
         }
 
@@ -120,7 +120,7 @@ class RealtorDashboard
 
         echo $statsSection;
         
-        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/index.php?page=my-listings.php" >All Active Listings</a></div>';
+        echo '<div class="pt-2" ><hr><a class="px-2" href="'.get_home_path().'wp-admin/index.php?page=my-listings.php" >All Active Listings</a></div>';
 
     }
 
@@ -131,7 +131,7 @@ class RealtorDashboard
             $this->realtorInfo['phone'] == '' && 
             $this->realtorInfo['broker'] == ''){
             echo '<p class="text-center mt-5">Required information is missing from configuration!</p>
-                    <p class="text-center pb-5"><a href="http://wprets.test/wordpress/wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
+                    <p class="text-center pb-5"><a href="'.get_home_path().'wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';
             return;
         }
 
@@ -167,7 +167,7 @@ class RealtorDashboard
 
         echo '</div>';
 
-        echo '<div class="pt-2" ><hr><a class="px-2" href="/wordpress/wp-admin/admin.php?page=contact-info" >Edit Information</a></div>';
+        echo '<div class="pt-2" ><hr><a class="px-2" href="'.get_home_path().'wp-admin/admin.php?page=contact-info" >Edit Information</a></div>';
 
     }
 
