@@ -18,7 +18,11 @@ class RealtorListings extends Mothership
         add_action( 'admin_menu', [$this, 'createListingsPage'] );
 
         $this->searchParams = [
-            'sort' => 'list_date|desc'
+            'sort' => 'list_date|desc',
+            'status' => [
+                'active' => 'Active',
+                'contingent' => 'Contingent'
+            ]
         ];
 
         $this->request = (isset($_GET['q']) ? $_GET : null);
