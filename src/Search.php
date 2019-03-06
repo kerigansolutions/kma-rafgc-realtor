@@ -71,6 +71,92 @@ class Search extends Mothership
         return $title;
     }
 
+    protected function yoastActive()
+    {
+        $active_plugins = get_option('active_plugins');
+        foreach($active_plugins as $plugin){
+            if(strpos($plugin, 'wp-seo')){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function setSeo()
+    {
+        
+        add_filter('wpseo_title', [$this, 'seoTitle']);
+        add_filter('wpseo_metadesc', [$this, 'metaDescription']);
+        add_filter('wpseo_canonical', [$this, 'setCanonical']);
+        
+        if(!$this->yoastActive()){
+            add_filter('pre_get_document_title', [$this, 'seoTitle']);
+            add_action( 'wp_head', [$this, 'setMeta']);
+        }
+    }
+
+    public function fixArea()
+    {
+        $area = (isset($this->searchParams['area']) && $this->searchParams['area'] != '' ?
+            $this->searchParams['area'] : 'Gulf & Franklin County');
+
+        return $area;
+    }
+
+    public function fixType()
+    {
+        $type = (isset($this->searchParams['propertyType']) && $this->searchParams['propertyType'] != '' ?
+            $this->searchParams['propertyType'] : 'Listings');
+        
+            switch ($type) {
+                case 'AllHomes':
+                    $type = 'Homes';
+                    break;
+                case 'AllLand':
+                    $type = 'Lots & Land';
+                    break;
+                case 'MultiUnit':
+                    $type = 'Muli-unit properties';
+                    break;
+                case 'Commercial':
+                    $type = 'Commercial properties';
+                    break;
+            }
+        
+        return $type;
+    }
+
+    public function seoTitle($data){
+        $area = $this->fixArea();
+        $type = $this->fixType();
+
+        return $type . ' for sale in ' . $area;
+    }
+
+    public function setMeta()
+    {
+        echo '<meta name="description" content="'.$this->metaDescription().'" />';
+    }
+
+    public function setCanonical()
+    {
+        $area = (isset($this->searchParams['area']) && $this->searchParams['area'] != '' ?
+            $this->searchParams['area'] : 'Any');
+
+        $type = (isset($this->searchParams['propertyType']) && $this->searchParams['propertyType'] != '' ?
+            $this->searchParams['propertyType'] : 'Any');
+
+        return WP_HOME . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) . '?q=search&area=' . $area . '&propertyType=' . $type;
+    }
+
+    public function metaDescription()
+    {
+        $area = $this->fixArea();
+        $type = $this->fixType();
+
+        return 'Browse all ' . $type . ' for sale in ' . $area . '. Contact '.get_bloginfo().' to schedule a showing today!';
+    }
+
     public function filterRequest()
     {
         if($this->request == null){
@@ -87,6 +173,7 @@ class Search extends Mothership
     public function makeRequest()
     {
         $this->filterRequest();
+        $this->setSeo();
 
         $request = '?q';
         foreach($this->searchParams as $key => $var){
