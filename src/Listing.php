@@ -80,4 +80,150 @@ class Listing extends Mothership
 
         return $this->listing;
     }
+
+    protected function yoastActive()
+    {
+        $active_plugins = get_option('active_plugins');
+        foreach($active_plugins as $plugin){
+            if(strpos($plugin, 'wp-seo')){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function setSeo()
+    {
+        add_filter('wpseo_title', [$this, 'seoTitle']);
+        add_filter('wpseo_metadesc', [$this, 'metaDescription']);
+        add_filter('wpseo_canonical', [$this, 'setCanonical']);
+        add_filter('wpseo_opengraph_image', function () { return null; });
+        add_action('wpseo_add_opengraph_images', [$this, 'ogPhotos']);
+
+        if(!$this->yoastActive()){
+            add_filter('pre_get_document_title', [$this, 'seoTitle']);
+            add_action( 'wp_head', [$this, 'setMeta']);
+        }
+    }
+
+    public function seoTitle($data){
+        
+        $address = $this->listing->full_address;
+        $price = ($this->listing->price != null ? '$' . number_format($this->listing->price) :
+            (isset($this->listing->monthly_rent) ? '$' . number_format($this->listing->monthly_rent) . ' / mo.' : ''));
+        $type = $this->fixType();
+        $status = $this->listing->status;
+        $area = $this->listing->area;
+
+        //Default title
+        $title = $type . ' for sale in ' . $area .' | ' . $price;
+
+        if($status == 'Sold/Closed'){
+            $title = 'SOLD | ' . $price . ' | ' . $address;
+        }
+        if($status == 'Contingent'){
+            $title = 'CONTINGENT | ' . $price . ' | ' . $address;
+        }
+        if($status == 'Active' && $this->listing->price != null){
+            $title = $type . ' for sale in ' . $area .' | ' . $price . ' | MLS# ' . $this->listing->mls_account;
+        }elseif(isset($this->listing->monthly_rent)){
+            $title = $type . ' for rent in ' . $area .' | ' . $price;
+        }
+
+        return $title;
+    }
+
+    public function fixType()
+    {
+        $type = $this->listing->prop_type;
+
+        //Change just the ones that need to be changed
+        switch ($type) {
+            case 'Residential Lots/Land':
+                $type = 'Land';
+                break;
+            case 'Improved Commercial':
+                $type = 'Commercial property';
+                break;
+            case 'Real Estate & Business':
+                $type = 'Property';
+                break;
+            case 'Unimproved Land':
+                $type = 'Land';
+                break;
+            case 'Dup/Tri/Quad (Multi-Unit)':
+                $type = 'Multi-Unit Property';
+                break;
+            case 'Detached Single Family':
+                $type = 'House';
+                break;
+            case 'Mobile/Manufactured':
+                $type = 'Mobile Home';
+                break;
+            case 'ASF (Attached Single Family)':
+                $type = 'Townhome';
+                break;
+            case 'Apartments/Multi-Family':
+                $type = 'Apartment';
+                break;
+            case 'Condominium':
+                $type = 'Condo';
+                break;
+            case 'Condominium Rental':
+                $type = 'Condo';
+                break;
+            case 'ASF (Attached Single Family) Rental':
+                $type = 'Townhome';
+                break;
+            case 'Detached Single Family Rental':
+                $type = 'House';
+                break;
+        }
+        
+        return $type;
+    }
+
+    public function setMeta()
+    {
+        echo '<meta name="description" content="'.$this->metaDescription().'" />';
+    }
+
+    public function setCanonical()
+    {
+        return WP_HOME . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+    }
+
+    public function metaDescription()
+    {
+        $metaLength = 130;
+        $break = ' ';
+        $pad = '...';
+        $text = $this->listing->remarks;
+
+        if(false !== ($breakpoint = strpos($text, $break, $metaLength))) { 
+            if($breakpoint < strlen($text) - 1) { 
+                $text = substr($text, 0, $breakpoint) . $pad; 
+            } 
+        } 
+
+        return $text;
+    }
+
+    public function ogPhotos(){
+        $photos = $this->listing->media_objects->data;
+
+        $photoParts = getimagesize ( $photos[0]->url );
+        echo '<meta property="og:image" content="' .  $photos[0]->url . '" />' . "\n";
+        echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://' , $photos[0]->url) . '" />' . "\n";
+        echo '<meta property="og:image:width" content="' .  $photoParts['0'] . '" />' . "\n";
+        echo '<meta property="og:image:height" content="' .  $photoParts['1'] . '" />' . "\n";
+
+        if(is_array($photos)){
+            foreach($photos as $photo){
+                echo '<meta property="og:image" content="' .  $photo->url . '" />' . "\n";
+                echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://' , $photo->url) . '" />' . "\n";
+            }
+        }
+
+    }
 }
