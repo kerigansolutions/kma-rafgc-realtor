@@ -77,6 +77,7 @@ class Listing extends Mothership
         $apiCall = parent::callApi('listing/' . $this->mlsNumber);
         $response = json_decode($apiCall->getBody());
         $this->listing = $response->data;
+        $this->setSeo();
 
         return $this->listing;
     }
