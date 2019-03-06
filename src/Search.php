@@ -60,6 +60,17 @@ class Search extends Mothership
         return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'list_date|desc';
     }
 
+    public function enhanceTitle()
+    {
+        if(isset($this->searchParams['area']) && $this->searchParams['area'] != ''){
+            $title = 'Searching properties in ' . $this->searchParams['area'];
+        }else{
+            $title = get_the_title();
+        }
+
+        return $title;
+    }
+
     public function filterRequest()
     {
         if($this->request == null){
