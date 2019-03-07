@@ -122,6 +122,9 @@ class Search extends Mothership
                 case 'Commercial':
                     $type = 'Commercial properties';
                     break;
+                case 'Any':
+                    $type = 'Properties';
+                    break;
             }
         
         return $type;
