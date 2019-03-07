@@ -63,7 +63,7 @@ class Search extends Mothership
 
     public function enhanceTitle()
     {
-        if(isset($this->searchParams['area']) && $this->searchParams['area'] != '' && $this->searchParams['Any'] != ''){
+        if(isset($this->searchParams['area']) && $this->searchParams['area'] != '' && $this->searchParams['area'] != 'Any'){
             $title = 'Searching properties in ' . $this->searchParams['area'];
         }else{
             $title = get_the_title();
