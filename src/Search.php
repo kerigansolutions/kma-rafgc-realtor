@@ -98,7 +98,10 @@ class Search extends Mothership
 
     public function fixArea()
     {
-        $area = (isset($this->searchParams['area']) && $this->searchParams['area'] != '' ?
+        $area = (
+            isset($this->searchParams['area']) && 
+            $this->searchParams['area'] != '' && 
+            $this->searchParams['area'] != 'Any' ?
             $this->searchParams['area'] : 'Gulf & Franklin County');
 
         return $area;
