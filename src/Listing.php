@@ -191,7 +191,7 @@ class Listing extends Mothership
 
     public function setCanonical()
     {
-        return WP_HOME . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+        return WP_HOME . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) . $this->listing->mls_account;
     }
 
     public function metaDescription()
