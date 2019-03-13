@@ -22,6 +22,11 @@ class Listing extends Mothership
         }
         return $this->listing;
     }
+    
+    public function set($mlsNumber)
+    {
+        $this->mlsNumber = $mlsNumber;
+    }
 
     public function getMlsNumber()
     {
