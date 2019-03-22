@@ -206,7 +206,7 @@ class Listing extends Mothership
         $pad = '...';
         $text = $this->listing->remarks;
 
-        if(false !== ($breakpoint = strpos($text, $break, $metaLength))) { 
+        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) { 
             if($breakpoint < strlen($text) - 1) { 
                 $text = substr($text, 0, $breakpoint) . $pad; 
             } 
