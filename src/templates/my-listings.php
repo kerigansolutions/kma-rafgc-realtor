@@ -10,7 +10,7 @@
     <div class="content px-4 pb-4">
         <div class="row" >
         <?php foreach($listings as $listing){ ?>
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="card listing bg-white p-0 shadow" >
                     <div 
                         class="embed-responsive embed-responsive-16by9 main-image"
