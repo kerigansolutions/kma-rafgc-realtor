@@ -17,13 +17,17 @@ class Search extends Mothership
         $this->searchableParams = [
             'omni',
             'area',
+            'status',
             'propertyType',
+            'forclosure',
             'minPrice',
             'maxPrice',
             'beds',
             'baths',
             'sqft',
             'acreage',
+            'waterfront',
+            'waterview',
             'sort',
             'page'
         ];
@@ -199,6 +203,10 @@ class Search extends Mothership
         }
 
         $request = $request . '&page=' . get_query_var( 'page' );
+
+        if(get_field('area_excludes','option') != ''){
+            $request = $request . '&excludes=' . get_field('area_excludes','option');
+        }
         
         return $request;
     }
