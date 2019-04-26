@@ -80,7 +80,7 @@ class RealtorDashboard
     public function addListingsWidget()
     {
         $listings = new RealtorListings($this->realtorInfo);
-        $listingStats = $listings->getListingStats(5);
+        $listingStats = $listings->getListingStats();
         $statsSection = '';
         $impressions = 0;
         $clicks = 0;
@@ -91,6 +91,7 @@ class RealtorDashboard
             return;
         }
 
+        $i = 0;
         foreach($listingStats as $listing){
             $impressions = $impressions + $listing->impressions;
             $clicks = $clicks + $listing->clicks;
@@ -104,6 +105,10 @@ class RealtorDashboard
                 </table>
             </div>';
 
+            $i++;
+            if($i > 5){
+                break;
+            }
         }
 
         echo '<div class="row mt-4">';
