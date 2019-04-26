@@ -89,11 +89,11 @@ add_filter( 'post_updated_messages', 'top_lot_updated_messages' );
 if( function_exists('acf_add_local_field_group') ):
 
 	acf_add_local_field_group(array(
-		'key' => 'group_5cc1f8435d633',
+		'key' => 'group_5cc1fdfbfdbfdbd633',
 		'title' => 'Featured List',
 		'fields' => array(
 			array(
-				'key' => 'field_5cc1f851bcdb5',
+				'key' => 'field_5cc1fedbdfbdfbdfbcdb5',
 				'label' => 'MLS Number',
 				'name' => 'mls_number',
 				'type' => 'text',
