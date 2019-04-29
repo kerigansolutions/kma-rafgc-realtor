@@ -45,6 +45,11 @@ class Search extends Mothership
 
     }
 
+    public function setRequest($searchParams)
+    {
+        $this->searchParams = $searchParams;
+    }
+
     public function getSearchResults()
     {
         return $this->results;
