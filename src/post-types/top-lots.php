@@ -36,7 +36,7 @@ function top_lot_init() {
 		'hierarchical'          => true,
 		'show_ui'               => true,
 		'show_in_nav_menus'     => true,
-		'supports'              => array( 'title' ),
+		'supports'              => array( 'title','page-attributes'  ),
 		'has_archive'           => false,
 		'rewrite'               => false,
 		'query_var'             => false,
