@@ -33,7 +33,7 @@ function top_home_init() {
 			'menu_name'             => __( 'Top Homes', 'wordplate' ),
 		),
 		'public'                => true,
-		'hierarchical'          => false,
+		'hierarchical'          => true,
 		'show_ui'               => true,
 		'show_in_nav_menus'     => true,
 		'supports'              => array( 'title' ),
