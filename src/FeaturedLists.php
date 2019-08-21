@@ -14,6 +14,7 @@ class FeaturedLists extends Mothership
     public function use()
     {
         $this->includePostType();
+        $this->setHooks();
     }
 
     protected function includePostType()
@@ -21,6 +22,11 @@ class FeaturedLists extends Mothership
         $this->dir = dirname(__FILE__);
         include(wp_normalize_path($this->dir . '/post-types/top-homes.php'));
         include(wp_normalize_path($this->dir . '/post-types/top-lots.php'));
+    }
+
+    protected function getWPData($postType = 'top-home', $limit)
+    {
+        return get_posts(['post_type' => $postType, 'posts_per_page' => $limit, 'orderby' => 'menu_order', 'order' => 'ASC']);
     }
 
     protected function getFeaturedList($postType = 'top-home', $limit)
@@ -45,6 +51,39 @@ class FeaturedLists extends Mothership
         }
 
         return $this->featuredList;
+    }
+
+    public function setHooks()
+    {
+        add_action( 'rest_api_init', [$this, 'setEndpoints']);
+    }
+
+    public function setEndpoints()
+    {
+        register_rest_route( 'kerigansolutions/v1', '/list', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'getAPIList'],
+        ) );
+    }
+
+    public function getAPIList($request)
+    {
+        $limit = ($request->get_param( 'limit' ) !== null ? $request->get_param( 'limit' ) : -1);
+        $postType = ($request->get_param( 'type' ) !== null ? $request->get_param( 'type' ) : 'top-home');
+
+        $output = [];
+
+        $i = 0;
+        foreach($this->getWPData($postType, $limit) as $item){
+            if(get_post_meta($item->ID, 'mls_number', true)){
+                $output[$i]['mls_number'] = get_post_meta($item->ID, 'mls_number', true);
+                $output[$i]['menu_order'] = $item->menu_order;
+                $output[$i]['post_title'] = $item->post_title;
+                $i++;
+            }
+        }
+        
+        return rest_ensure_response($output);
     }
 
 }
