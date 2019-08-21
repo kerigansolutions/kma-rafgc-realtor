@@ -13,6 +13,7 @@ class Listing extends Mothership
     {
         $this->slug = 'listing';
         add_filter('the_posts',array($this,'createTemplate'));
+        $this->setHooks();
     }
 
     public function get()
@@ -26,6 +27,11 @@ class Listing extends Mothership
     public function set($mlsNumber)
     {
         $this->mlsNumber = $mlsNumber;
+    }
+
+    public function setHooks()
+    {
+        add_action( 'rest_api_init', [$this, 'setEndpoints']);
     }
 
     public function getMlsNumber()
@@ -231,5 +237,24 @@ class Listing extends Mothership
             }
         }
 
+    }
+
+    public function setEndpoints()
+    {
+        register_rest_route( 'kerigansolutions/v1', '/listing', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'getAPIListing'],
+        ) );
+    }
+
+    public function getAPIListing($request)
+    {
+        $mlsNumber = ($request->get_param( 'mls' ) !== null ? $request->get_param( 'mls' ) : null);
+
+        if($mlsNumber){
+            $apiCall = parent::callApi('listing/' . $mlsNumber);
+            $data = json_decode($apiCall->getBody())->data;
+            return rest_ensure_response($data);
+        }
     }
 }
