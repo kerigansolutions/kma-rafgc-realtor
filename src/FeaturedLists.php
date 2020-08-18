@@ -63,6 +63,7 @@ class FeaturedLists extends Mothership
         register_rest_route( 'kerigansolutions/v1', '/list', array(
             'methods' => 'GET',
             'callback' => [$this, 'getAPIList'],
+            'permission_callback' => '__return_true'
         ) );
     }
 

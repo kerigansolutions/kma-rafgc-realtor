@@ -244,6 +244,7 @@ class Listing extends Mothership
         register_rest_route( 'kerigansolutions/v1', '/listing', array(
             'methods' => 'GET',
             'callback' => [$this, 'getAPIListing'],
+            'permission_callback' => '__return_true'
         ) );
     }
 
