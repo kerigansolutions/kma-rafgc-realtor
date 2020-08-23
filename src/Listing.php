@@ -12,7 +12,10 @@ class Listing extends Mothership
     public function use()
     {
         $this->slug = 'listing';
-        add_filter('the_posts',array($this,'createTemplate'));
+        add_action( 'init', [$this,'addRewriteRule'] );
+        add_filter( 'query_vars', [$this, 'addQueryVar'] );
+        add_filter( 'the_posts', [$this,'createTemplate']);
+
         $this->setHooks();
     }
 
@@ -32,6 +35,7 @@ class Listing extends Mothership
     public function setHooks()
     {
         add_action( 'rest_api_init', [$this, 'setEndpoints']);
+        
     }
 
     public function getMlsNumber()
@@ -46,28 +50,54 @@ class Listing extends Mothership
         return false;
     }
 
-    public function createTemplate($posts)
+    public function addRewriteRule()
     {
+        add_rewrite_rule(
+            '^listing/([0-9]+)/?',
+            'index.php?mls=$matches[1]',
+            'top'
+        );
+    }
+
+    public function addQueryVar($query_vars)
+    {
+        $query_vars[] = 'mls';
+        return $query_vars;
+    }
+
+    public function createTemplate()
+    {
+
         global $wp,$wp_query;
+        
+        $mls = intval( get_query_var( 'mls' ) );
+        if ( $mls ) {
 
-        //check if user is requesting our listings page
-        if($this->getMlsNumber()){
-
+            $this->mlsNumber = $mls;
             $this->getListing();
 
             $post = new \stdClass;
             $post->post_author = 1;
             $post->post_name = $this->slug;
-            $post->guid = get_bloginfo($this->slug);
+            $post->post_date = date('Y-m-d H:i:s');
+            $post->post_date_gmt = date('Y-m-d H:i:s');
+            $post->guid = get_home_url() . '/' .$this->slug . '/' . $this->listing->mls_account;
+            $post->post_type = 'page';
+            $post->post_parent = 0;
+            $post->menu_order = 0;
+            $post->filter = 'raw';
             $post->post_title = $this->listing->full_address;
-            $post->post_content = null;
+            $post->post_content = $this->listing->remarks;
             $post->ID = -42;
-            $post->post_status = 'static';
+            $post->post_status = 'publish';
             $post->comment_status = 'closed';
             $post->ping_status = 'closed';
             $post->comment_count = 0;
             $post->post_date = current_time('mysql');
             $post->post_date_gmt = current_time('mysql',1);
+
+            $post = new \WP_Post($post);
+
             $posts = NULL;
             $posts[] = $post;
             $wp_query->is_page = true;
@@ -78,6 +108,7 @@ class Listing extends Mothership
             unset($wp_query->query["error"]);
             $wp_query->query_vars["error"]="";
             $wp_query->is_404 = false;
+            
         }
 
         return $posts;
