@@ -14,17 +14,19 @@ class Listing extends Mothership
         $this->slug = 'listing';
         add_action( 'init', [$this,'addRewriteRule'] );
         add_filter( 'query_vars', [$this, 'addQueryVar'] );
-        add_filter( 'the_posts', [$this,'createTemplate']);
+        add_filter( 'template_include', [$this,'loadTemplate'] ) ;
 
         $this->setHooks();
     }
 
     public function get()
     {
-        if($this->getMlsNumber()){
-            $this->listing = $this->getListing();
+        if( $this->mlsIsGood() ){  
+            $this->listing = $this->getListing();  
+            return $this->listing;
         }
-        return $this->listing;
+
+        return false;
     }
     
     public function set($mlsNumber)
@@ -35,15 +37,14 @@ class Listing extends Mothership
     public function setHooks()
     {
         add_action( 'rest_api_init', [$this, 'setEndpoints']);
-        
     }
 
-    public function getMlsNumber()
+    public function mlsIsGood()
     {
-        $pathFragments = explode('listing/',$_SERVER['REQUEST_URI']);
+        $pathFragments = explode('listing/', $_SERVER['REQUEST_URI']);
         $this->mlsNumber = str_replace('/','',end($pathFragments));
-
-        if(strlen($this->mlsNumber) > 3 && is_numeric($this->mlsNumber)){
+        
+        if(strlen($this->mlsNumber) > 3 && is_numeric($this->mlsNumber)){            
             return true;
         }
 
@@ -54,8 +55,7 @@ class Listing extends Mothership
     {
         add_rewrite_rule(
             '^listing/([0-9]+)/?',
-            'index.php?mls=$matches[1]',
-            'top'
+            'index.php?mls=$matches[1]'
         );
     }
 
@@ -65,53 +65,12 @@ class Listing extends Mothership
         return $query_vars;
     }
 
-    public function createTemplate()
+    public function loadTemplate($template)
     {
-
-        global $wp,$wp_query;
-        
-        $mls = intval( get_query_var( 'mls' ) );
-        if ( $mls ) {
-
-            $this->mlsNumber = $mls;
-            $this->getListing();
-
-            $post = new \stdClass;
-            $post->post_author = 1;
-            $post->post_name = $this->slug;
-            $post->post_date = date('Y-m-d H:i:s');
-            $post->post_date_gmt = date('Y-m-d H:i:s');
-            $post->guid = get_home_url() . '/' .$this->slug . '/' . $this->listing->mls_account;
-            $post->post_type = 'page';
-            $post->post_parent = 0;
-            $post->menu_order = 0;
-            $post->filter = 'raw';
-            $post->post_title = $this->listing->full_address;
-            $post->post_content = $this->listing->remarks;
-            $post->ID = -42;
-            $post->post_status = 'publish';
-            $post->comment_status = 'closed';
-            $post->ping_status = 'closed';
-            $post->comment_count = 0;
-            $post->post_date = current_time('mysql');
-            $post->post_date_gmt = current_time('mysql',1);
-
-            $post = new \WP_Post($post);
-
-            $posts = NULL;
-            $posts[] = $post;
-            $wp_query->is_page = true;
-            $wp_query->is_singular = true;
-            $wp_query->is_home = false;
-            $wp_query->is_archive = false;
-            $wp_query->is_category = false;
-            unset($wp_query->query["error"]);
-            $wp_query->query_vars["error"]="";
-            $wp_query->is_404 = false;
-            
+        if($this->mlsIsGood()){
+            $template = TEMPLATEPATH . '/page-listing.php';
         }
-
-        return $posts;
+        return $template;
     }
 
     public function getListing()
