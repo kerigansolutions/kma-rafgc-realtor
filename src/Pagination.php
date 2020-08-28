@@ -20,13 +20,12 @@ class Pagination {
         $request = '?q=search';
         foreach($this->searchParams as $key => $var){
             if(is_array($var)){
-                $request .= '&' . $key . '=';
                 foreach($var as $k => $v){
-                    $request .= '&' . $key . '[]=' . $v;
+                    $request .= '&' . $key . '[]=' . urlencode($v);
                 }
             }else{
                 if($var != '' && $var != 'Any'){
-                    $request .= '&' . $key . '=' . $var;
+                    $request .= '&' . $key . '=' . urlencode($var);
                 }
             }
         }
