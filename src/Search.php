@@ -183,6 +183,9 @@ class Search extends Mothership
             if(in_array($key, $this->searchableParams)){
                 $this->searchParams[$key] = $var;
             }
+            if($key == 'pg'){
+                $this->searchParams['page'] = $var;
+            }
         }
     }
 
@@ -206,8 +209,6 @@ class Search extends Mothership
                 }
             }
         }
-
-        $request = $request . '&page=' . get_query_var( 'page' );
 
         if(get_field('area_excludes','option') != ''){
             $request = $request . '&excludes=' . get_field('area_excludes','option');

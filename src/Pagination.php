@@ -46,7 +46,7 @@ class Pagination {
 
         $output .= '<nav aria-label="search results pagination"><ul class="pagination m-0">';
         if(isset($pages->links->previous)){
-            $link = $request . '&page=' . ($currentPage - 1);
+            $link = $request . '&pg=' . ($currentPage - 1);
             $output .= '<li class="page-item"><a class="page-link" href="'. $link .'" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span> Previous
             </a></li>';
@@ -61,7 +61,7 @@ class Pagination {
             $endPage   = ($currentPage < $pages->total_pages - 2 ? $currentPage + 2 : $pages->total_pages );
 
             if($startPage != 1){
-                $output .= '<li class="page-item"><a class="page-link" href="'. $request . '&page=1">1</a></li>';
+                $output .= '<li class="page-item"><a class="page-link" href="'. $request . '&pg=1">1</a></li>';
             }
             if($startPage > 3){
                 $output   .= '<li class="page-item disabled"><a class="page-link disabled" tabindex="-1" >...</a></li>';
@@ -70,7 +70,7 @@ class Pagination {
             }
 
             for($i = $startPage; $i <= $endPage; $i++){
-                $link = $request . '&page=' . $i;
+                $link = $request . '&pg=' . $i;
                 $output .= '<li class="page-item' . ($currentPage == $i ? ' active' : '') . '"><a class="page-link" href="'. $link .'">' . $i .'</a></li>';
             }
 
@@ -78,12 +78,12 @@ class Pagination {
                 $output .= '<li class="page-item disabled"><a class="page-link disabled" tabindex="-1" >...</a></li>';
             }
             if($endPage < $pages->total_pages){
-                $output .= '<li class="page-item"><a class="page-link" href="'. $request . '&page=' . $pages->total_pages .'">'. $pages->total_pages .'</a></li>';
+                $output .= '<li class="page-item"><a class="page-link" href="'. $request . '&pg=' . $pages->total_pages .'">'. $pages->total_pages .'</a></li>';
             }
         }
 
         if(isset($pages->links->next)){
-            $link = $request . '&page=' . ($currentPage + 1);
+            $link = $request . '&pg=' . ($currentPage + 1);
             $output .= '<li class="page-item"><a class="page-link" href="'. $link .'" aria-label="Next">
                 Next <span aria-hidden="true">&raquo;</span>
             </a></li>';
