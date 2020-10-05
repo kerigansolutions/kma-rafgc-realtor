@@ -68,6 +68,7 @@ class Listing extends Mothership
     public function loadTemplate($template)
     {
         if($this->mlsIsGood()){
+            status_header(200, 'OK');
             $template = TEMPLATEPATH . '/page-listing.php';
         }
         return $template;
