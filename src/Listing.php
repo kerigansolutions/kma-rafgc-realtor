@@ -98,6 +98,8 @@ class Listing extends Mothership
     public function setSeo()
     {
         add_filter('wpseo_title', [$this, 'seoTitle']);
+        add_filter('wpseo_opengraph_title', [$this, 'seoTitle']); 
+        add_filter('wpseo_twitter_title', [$this, 'seoTitle']); 
         add_filter('wpseo_metadesc', [$this, 'metaDescription']);
         add_filter('wpseo_canonical', [$this, 'setCanonical']);
         add_filter('wpseo_opengraph_image', function () { return null; });
