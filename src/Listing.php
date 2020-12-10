@@ -163,8 +163,8 @@ class Listing extends Mothership
     public function setOpenGraph()
     {
         echo '<meta property="og:site_name" content="'.get_bloginfo('name').'" />';
-        echo '<meta name="og:title" content="'.$this->seoTitle().'" />';
-        echo '<meta name="og:description" content="'.$this->metaDescription().'" />';
+        echo '<meta property="og:title" content="'.$this->seoTitle().'" />';
+        echo '<meta property="og:description" content="'.$this->metaDescription().'" />';
         echo '<meta property="og:url" content="'.$this->canonicalUrl().'" />';
         echo '<meta property="og:type" content="'.$this->ogType().'"/>';
         echo '<meta property="og:street-address" content="'.$this->listing->full_address.'"/>'; 
