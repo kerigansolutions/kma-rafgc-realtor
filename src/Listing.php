@@ -85,6 +85,10 @@ class Listing extends Mothership
         return $this->listing;
     }
 
+    /**
+     * Checks whether Yoast is active
+     * Returns Boolean
+     */
     protected function yoastActive()
     {
         $active_plugins = get_option('active_plugins');
@@ -96,24 +100,121 @@ class Listing extends Mothership
         return false;
     }
 
+    /**
+     * Hook meta tags into WP lifecycle
+     * Removes Yoast tags since they don't work well in this use case.
+     */
     public function setSeo()
     {
-        add_filter('wpseo_title', [$this, 'seoTitle']);
-        add_filter('wpseo_opengraph_title', [$this, 'seoTitle']); 
-        add_filter('wpseo_twitter_title', [$this, 'seoTitle']); 
-        add_filter('wpseo_og_title', [$this, 'seoTitle']);
-        add_filter('wpseo_metadesc', [$this, 'metaDescription']);
-        add_filter('wpseo_canonical', [$this, 'setCanonical']);
-        add_filter('wpseo_opengraph_image', function () { return null; });
-        add_action('wpseo_add_opengraph_images', [$this, 'ogPhotos']);
-
-        if(!$this->yoastActive()){
-            add_filter('pre_get_document_title', [$this, 'seoTitle']);
-            add_action( 'wp_head', [$this, 'setMeta']);
+        // override Yoast so we can use dynamic data
+        if($this->yoastActive()){
+            add_filter('wpseo_title', [$this, 'seoTitle']);
+            add_filter('wpseo_metadesc', function () { return false; });
+            add_filter('wpseo_canonical', function () { return false; });
+            add_filter('wpseo_robots', function () { return false; });
+            add_filter('wpseo_opengraph_url', function () { return false; });
+            add_filter('wpseo_opengraph_type', function () { return false; });
+            add_filter('wpseo_opengraph_image', function () { return false; });
+            add_filter('wpseo_opengraph_title', function () { return false; });
+            add_filter('wpseo_opengraph_site_name', function () { return false; });
+            add_filter('wpseo_opengraph_admin', function () { return false; });
+            add_filter('wpseo_opengraph_author_facebook', function () { return false; });
+            add_filter('wpseo_opengraph_show_publish_date', function () { return false; });
+            add_filter('wpseo_twitter_description', function () { return false; });
+            add_filter('wpseo_twitter_card_type', function () { return false; });
+            add_filter('wpseo_twitter_site', function () { return false; });
+            add_filter('wpseo_twitter_image', function () { return false; });
+            add_filter('wpseo_twitter_creator_account', function () { return false; });
+            add_filter('wpseo_json_ld_output', function () { return false; });
         }
+
+        add_filter('pre_get_document_title', [$this, 'seoTitle']);
+        add_action( 'wp_head', [$this, 'setStandardMeta']);
+        add_action( 'wp_head', [$this, 'setTwitterCard']);
+        add_action( 'wp_head', [$this, 'setOpenGraph']);
     }
 
-    public function seoTitle($data){
+    /**
+     * Publishes standard meta description and canonical tags
+     * Echos output directly
+     */
+    public function setStandardMeta()
+    {
+        echo '<meta name="description" content="'.$this->metaDescription().'" />';
+        echo '<link rel="canonical" href="'.$this->canonicalUrl().'"/>';
+    }
+
+    /**
+     * Publishes twitter meta tags for nice looking twitter cards
+     * Echos output directly
+     */
+    public function setTwitterCard()
+    {
+        echo '<meta name="twitter:title" content="'.$this->seoTitle().'" />';
+        echo '<meta name="twitter:card" content="summary_large_image" />';
+        echo '<meta name="description" content="'.$this->metaDescription().'"/>';
+        echo '<meta name="twitter:site" content="'.get_bloginfo('name').'"/>';
+    }
+
+    /**
+     * Publishes Open Graph tags for nice looking Facebook snippets
+     * Echos output directly
+     */
+    public function setOpenGraph()
+    {
+        echo '<meta property="og:site_name" content="'.get_bloginfo('name').'" />';
+        echo '<meta name="og:title" content="'.$this->seoTitle().'" />';
+        echo '<meta name="og:description" content="'.$this->metaDescription().'" />';
+        echo '<meta property="og:url" content="'.$this->canonicalUrl().'" />';
+        echo '<meta property="og:type" content="'.$this->ogType().'"/>';
+        echo '<meta property="og:street-address" content="'.$this->listing->full_address.'"/>'; 
+        echo '<meta property="og:locality" content="'.$this->listing->city.'"/>'; 
+        echo '<meta property="og:region" content="'.$this->listing->state.'"/>'; 
+        echo '<meta property="og:postal-code" content="'.$this->listing->zip.'"/>'; 
+        echo '<meta property="og:country-name" content="USA"/>'; 
+        echo '<meta property="place:location:latitude" content="'.$this->listing->location->lat.'"/>'; 
+        echo '<meta property="place:location:longitude" content="'.$this->listing->location->long.'"/>';
+
+        $this->ogImage();
+    }
+
+    /**
+     * Breaks down the primary image from the mothership and pops out the url, height and width required for Facebook
+     * Echos output directly
+     */
+    public function ogImage($url = null)
+    {
+        $photoParts = getimagesize ( $this->listing->media_objects->data[0]->url );
+        echo '<meta property="og:image" content="' .  $this->listing->media_objects->data[0]->url . '" />' . "\n";
+        echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://', $this->listing->media_objects->data[0]->url ) . '" />' . "\n";
+        echo '<meta property="og:image:width" content="' .  $photoParts['0'] . '" />' . "\n";
+        echo '<meta property="og:image:height" content="' .  $photoParts['1'] . '" />' . "\n";
+    }
+
+    /**
+     * Sets the schema type to place. This may change in the future, but for now it's what Realtor.com uses.
+     * @return String
+     */
+    public function ogType($type = null)
+    {
+        return "place";
+    }
+
+    /**
+     * Returns the correct canonical URL
+     * @return String
+     */
+    public function canonicalUrl($data = null)
+    {
+        return trailingslashit($_SERVER["REQUEST_URI"]);
+    }
+
+    /**
+     * Returns a formatted page title with listing data
+     * @return String $title
+     */
+    public function seoTitle($data = null)
+    {
         
         $address = $this->listing->full_address;
         $price = ($this->listing->price != null ? '$' . number_format($this->listing->price) :
@@ -140,6 +241,30 @@ class Listing extends Mothership
         return $title;
     }
 
+    /**
+     * Returns a truncated meta description
+     * @return String $text
+     */
+    public function metaDescription()
+    {
+        $metaLength = 130;
+        $break = ' ';
+        $pad = '...';
+        $text = $this->listing->remarks;
+
+        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) { 
+            if($breakpoint < strlen($text) - 1) { 
+                $text = substr($text, 0, $breakpoint) . $pad; 
+            } 
+        } 
+
+        return $text;
+    }
+
+    /**
+     * Returns a simplified string based on what property type is returned from the listing data. We do this for our SEO content. 
+     * @return String $type
+     */
     public function fixType()
     {
         $type = $this->listing->prop_type;
@@ -188,50 +313,6 @@ class Listing extends Mothership
         }
         
         return $type;
-    }
-
-    public function setMeta()
-    {
-        echo '<meta name="description" content="'.$this->metaDescription().'" />';
-    }
-
-    public function setCanonical()
-    {
-        return $_SERVER['HTTP_HOST'] . $_SERVER["REQUEST_URI"];
-    }
-
-    public function metaDescription()
-    {
-        $metaLength = 130;
-        $break = ' ';
-        $pad = '...';
-        $text = $this->listing->remarks;
-
-        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) { 
-            if($breakpoint < strlen($text) - 1) { 
-                $text = substr($text, 0, $breakpoint) . $pad; 
-            } 
-        } 
-
-        return $text;
-    }
-
-    public function ogPhotos(){
-        $photos = $this->listing->media_objects->data;
-
-        $photoParts = getimagesize ( $photos[0]->url );
-        echo '<meta property="og:image" content="' .  $photos[0]->url . '" />' . "\n";
-        echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://' , $photos[0]->url) . '" />' . "\n";
-        echo '<meta property="og:image:width" content="' .  $photoParts['0'] . '" />' . "\n";
-        echo '<meta property="og:image:height" content="' .  $photoParts['1'] . '" />' . "\n";
-
-        if(is_array($photos)){
-            foreach($photos as $photo){
-                echo '<meta property="og:image" content="' .  $photo->url . '" />' . "\n";
-                echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://' , $photo->url) . '" />' . "\n";
-            }
-        }
-
     }
 
     public function setEndpoints()

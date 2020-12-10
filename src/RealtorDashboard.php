@@ -42,11 +42,11 @@ class RealtorDashboard
     public function addLeadsWidget()
     {
 
-        echo '<div class="row mt-4">';
+        echo '<div class="row no-gutters mt-4">';
 
-        echo '<div class="col-6 text-center"><span class="display-3 text-primary font-weight-bold">'.count($this->getLeads(-1,'publish')).'</span><br><small class="text-muted">Active Leads</small></div>';
+        echo '<div class="col-6 text-center"><span class="display-3 text-primary font-weight-bolder">'.count($this->getLeads(-1,'publish')).'</span><br><small class="text-muted text-uppercase">Active Leads</small></div>';
 
-        echo '<div class="col-6 text-center"><span class="display-3 text-primary font-weight-bold">'.count($this->getLeads(-1,'trash')).'</span><br><small class="text-muted">Archived Leads</small></div>';
+        echo '<div class="col-6 text-center"><span class="display-3 text-primary font-weight-bolder">'.count($this->getLeads(-1,'trash')).'</span><br><small class="text-muted text-uppercase">Archived Leads</small></div>';
 
         echo '</div>';
 
@@ -111,15 +111,15 @@ class RealtorDashboard
             }
         }
 
-        echo '<div class="row mt-4">';
+        echo '<div class="row no-gutters mt-4">';
 
-        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bold">'.count($listings->getListings(true)).'</span><br><small class="text-muted">Active Listings</small></div>';
+        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bolder">'.count($listings->getListings(true)).'</span><br><small class="text-muted text-uppercase">Active Listings</small></div>';
 
-        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bold">'.count($listings->getSoldListings()).'</span><br><small class="text-muted">Sold Listings (6 mo.)</small></div>';
+        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bolder">'.count($listings->getSoldListings()).'</span><br><small class="text-muted text-uppercase">Sold Listings (6 mo.)</small></div>';
 
-        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bold">'.number_format($impressions).'</span><br><small class="text-muted">Listing Impressions</small></div>';
+        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bolder">'.number_format($impressions).'</span><br><small class="text-muted text-uppercase">Listing Impressions</small></div>';
 
-        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bold">'.number_format($clicks).'</span><br><small class="text-muted">Listing Clicks</small></div>';
+        echo '<div class="col-6 pb-4 text-center"><span class="display-3 text-primary font-weight-bolder">'.number_format($clicks).'</span><br><small class="text-muted text-uppercase">Listing Clicks</small></div>';
 
         echo '</div>';
 
