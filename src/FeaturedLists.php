@@ -24,12 +24,12 @@ class FeaturedLists extends Mothership
         include(wp_normalize_path($this->dir . '/post-types/top-lots.php'));
     }
 
-    protected function getWPData($postType = 'top-home', $limit)
+    protected function getWPData($postType = 'top-home', $limit = -1)
     {
         return get_posts(['post_type' => $postType, 'posts_per_page' => $limit, 'orderby' => 'menu_order', 'order' => 'ASC']);
     }
 
-    protected function getFeaturedList($postType = 'top-home', $limit)
+    protected function getFeaturedList($postType = 'top-home', $limit = -1)
     {
         foreach(get_posts(['post_type' => $postType, 'posts_per_page' => $limit, 'orderby' => 'menu_order', 'order' => 'ASC']) as $post){
             $apiCall = parent::callApi('listing/' . get_field('mls_number', $post->ID));
