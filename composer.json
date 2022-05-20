@@ -3,7 +3,7 @@
     "description": "RAFGC realtor package for KMA WP Sites",
     "require": {
         "guzzlehttp/guzzle": "^6.3",
-        "nesbot/carbon": "^1.22"
+        "nesbot/carbon": "^2"
     },
     "type": "library",
     "license": "MIT",
