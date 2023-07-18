@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace KeriganSolutions\KMARealtor;
 
 class Listing extends Mothership
@@ -21,14 +21,19 @@ class Listing extends Mothership
 
     public function get()
     {
-        if( $this->mlsIsGood() ){  
-            $this->listing = $this->getListing();  
+        if( $this->mlsIsGood() ){
+            $this->listing = $this->getListing();
+
+            if(!isset( $this->listing->mls_account )) {
+                return false;
+            }
+
             return $this->listing;
         }
 
         return false;
     }
-    
+
     public function set($mlsNumber)
     {
         $this->mlsNumber = $mlsNumber;
@@ -44,8 +49,8 @@ class Listing extends Mothership
         $pathFragments = explode('?', $_SERVER['REQUEST_URI'], 2);
         $pathFragments = explode('listing/', $pathFragments[0]);
         $this->mlsNumber = str_replace('/','',end($pathFragments));
-        
-        if(strlen($this->mlsNumber) > 3 && is_numeric($this->mlsNumber)){            
+
+        if(strlen($this->mlsNumber) > 3 && is_numeric($this->mlsNumber)){
             return true;
         }
 
@@ -106,6 +111,10 @@ class Listing extends Mothership
      */
     public function setSeo()
     {
+        if(!isset($this->listing->mls_account)) {
+            return null;
+        }
+
         // override Yoast so we can use dynamic data
         if($this->yoastActive()){
             add_filter('wpseo_title', [$this, 'seoTitle']);
@@ -167,12 +176,12 @@ class Listing extends Mothership
         echo '<meta property="og:description" content="'.$this->metaDescription().'" />';
         echo '<meta property="og:url" content="'.$this->canonicalUrl().'" />';
         echo '<meta property="og:type" content="'.$this->ogType().'"/>';
-        echo '<meta property="og:street-address" content="'.$this->listing->full_address.'"/>'; 
-        echo '<meta property="og:locality" content="'.$this->listing->city.'"/>'; 
-        echo '<meta property="og:region" content="'.$this->listing->state.'"/>'; 
-        echo '<meta property="og:postal-code" content="'.$this->listing->zip.'"/>'; 
-        echo '<meta property="og:country-name" content="USA"/>'; 
-        echo '<meta property="place:location:latitude" content="'.$this->listing->location->lat.'"/>'; 
+        echo '<meta property="og:street-address" content="'.$this->listing->full_address.'"/>';
+        echo '<meta property="og:locality" content="'.$this->listing->city.'"/>';
+        echo '<meta property="og:region" content="'.$this->listing->state.'"/>';
+        echo '<meta property="og:postal-code" content="'.$this->listing->zip.'"/>';
+        echo '<meta property="og:country-name" content="USA"/>';
+        echo '<meta property="place:location:latitude" content="'.$this->listing->location->lat.'"/>';
         echo '<meta property="place:location:longitude" content="'.$this->listing->location->long.'"/>';
 
         $this->ogImage();
@@ -184,6 +193,10 @@ class Listing extends Mothership
      */
     public function ogImage($url = null)
     {
+        if(!isset($this->listing->media_objects->data[0]->url)) {
+            return null;
+        }
+
         $photoParts = getimagesize ( $this->listing->media_objects->data[0]->url );
         echo '<meta property="og:image" content="' .  $this->listing->media_objects->data[0]->url . '" />' . "\n";
         echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://', $this->listing->media_objects->data[0]->url ) . '" />' . "\n";
@@ -215,7 +228,7 @@ class Listing extends Mothership
      */
     public function seoTitle($data = null)
     {
-        
+
         $address = $this->listing->full_address;
         $price = ($this->listing->price != null ? '$' . number_format($this->listing->price) :
             (isset($this->listing->monthly_rent) ? '$' . number_format($this->listing->monthly_rent) . ' / mo.' : ''));
@@ -252,17 +265,17 @@ class Listing extends Mothership
         $pad = '...';
         $text = $this->listing->remarks;
 
-        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) { 
-            if($breakpoint < strlen($text) - 1) { 
-                $text = substr($text, 0, $breakpoint) . $pad; 
-            } 
-        } 
+        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) {
+            if($breakpoint < strlen($text) - 1) {
+                $text = substr($text, 0, $breakpoint) . $pad;
+            }
+        }
 
         return $text;
     }
 
     /**
-     * Returns a simplified string based on what property type is returned from the listing data. We do this for our SEO content. 
+     * Returns a simplified string based on what property type is returned from the listing data. We do this for our SEO content.
      * @return String $type
      */
     public function fixType()
@@ -311,7 +324,7 @@ class Listing extends Mothership
                 $type = 'House';
                 break;
         }
-        
+
         return $type;
     }
 
