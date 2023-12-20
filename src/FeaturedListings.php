@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace KeriganSolutions\KMARealtor;
 
 class FeaturedListings extends Mothership
@@ -37,7 +37,7 @@ class FeaturedListings extends Mothership
             return [];
         }
 
-        $apiCall = parent::callApi('listings?mlsNumbers=' . implode('|',$this->featuredListings));
+        $apiCall = parent::callApi('listings?mls=' . implode('|',$this->featuredListings));
         $response = json_decode($apiCall->getBody());
         return $response->data;
     }

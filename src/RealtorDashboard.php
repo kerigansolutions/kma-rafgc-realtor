@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace KeriganSolutions\KMARealtor;
 
 class RealtorDashboard
@@ -25,18 +25,18 @@ class RealtorDashboard
             'My Information',                    // Title.
             [ $this, 'addInfoWidget'] // Display function.
         );
-        
+
         wp_add_dashboard_widget(
             'leads_dashboard_widget',      // Widget slug.
             'My Leads',                    // Title.
             [ $this, 'addLeadsWidget'] // Display function.
         );
 
-        wp_add_dashboard_widget(
-            'listings_dashboard_widget',      // Widget slug.
-            'My Listings',                    // Title.
-            [ $this, 'addListingsWidget'] // Display function.
-        );
+        // wp_add_dashboard_widget(
+        //     'listings_dashboard_widget',      // Widget slug.
+        //     'My Listings',                    // Title.
+        //     [ $this, 'addListingsWidget'] // Display function.
+        // );
     }
 
     public function addLeadsWidget()
@@ -57,8 +57,8 @@ class RealtorDashboard
                 <p><span class="display-5 font-weight-bold">'.$lead->post_title.'</span><br>
                 <a href="mailto:'.$email.'" >'.$email.'</a><br><a href="tel:'.$phone.'" >'.$phone.'</a></p>
                 <p>'.get_post_meta($lead->ID, 'comments', true).'</p>
-                <a href="'.get_edit_post_link($lead->ID).'" class="btn btn-primary btn-sm" >View</a> 
-                <a href="'.get_edit_post_link($lead->ID).'" class="btn btn-info btn-sm" >Archive</a>
+                <a href="'.get_edit_post_link($lead->ID).'" class="btn btn-primary btn-sm" >View</a>
+                <a href="'.get_delete_post_link($lead->ID).'" class="btn btn-info btn-sm" >Archive</a>
             </div>';
         }
 
@@ -124,16 +124,16 @@ class RealtorDashboard
         echo '</div>';
 
         echo $statsSection;
-        
+
         echo '<div class="pt-2" ><hr><a class="px-2" href="'.get_site_url().'/wp-admin/index.php?page=my-listings.php" >All Active Listings</a></div>';
 
     }
 
     public function addInfoWidget()
     {
-        if($this->realtorInfo['name'] == '' && 
-            $this->realtorInfo['email'] == '' && 
-            $this->realtorInfo['phone'] == '' && 
+        if($this->realtorInfo['name'] == '' &&
+            $this->realtorInfo['email'] == '' &&
+            $this->realtorInfo['phone'] == '' &&
             $this->realtorInfo['broker'] == ''){
             echo '<p class="text-center mt-5">Required information is missing from configuration!</p>
                     <p class="text-center pb-5"><a href="'.get_site_url().'/wp-admin/admin.php?page=contact-info" >Complete your setup</a></p>';

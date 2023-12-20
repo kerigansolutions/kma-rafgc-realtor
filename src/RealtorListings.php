@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace KeriganSolutions\KMARealtor;
 
 class RealtorListings extends Mothership
@@ -15,10 +15,12 @@ class RealtorListings extends Mothership
         parent::__construct();
         $this->realtorInfo = KMARealtor::getRealtorInfo();
         $this->dir = dirname(__FILE__);
-        add_action( 'admin_menu', [$this, 'createListingsPage'] );
+        // New system doesnt support stats, and nobody uses it nayway, so remove.
+        // add_action( 'admin_menu', [$this, 'createListingsPage'] );
 
         $this->searchParams = [
-            'sort' => 'list_date|desc',
+            'sort' => 'date_listed|desc',
+            'agent' => isset($this->realtorInfo['id']) ? $this->realtorInfo['id'] : '',
             'status' => [
                 'active' => 'Active',
                 'contingent' => 'Contingent'
@@ -35,7 +37,7 @@ class RealtorListings extends Mothership
 
     public function getSort()
     {
-        return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'list_date|desc';
+        return isset($this->searchParams['sort']) ? $this->searchParams['sort'] : 'date_listed|desc';
     }
 
     public function getCurrentRequest()
@@ -48,7 +50,7 @@ class RealtorListings extends Mothership
         if($this->request == null){
             return false;
         }
-        
+
         foreach($this->request as $key => $var){
             if(in_array($key, $this->searchableParams)){
                 $this->searchParams[$key] = $var;
@@ -60,81 +62,115 @@ class RealtorListings extends Mothership
     {
         $this->filterRequest();
 
-        $request = '';
-        foreach($this->searchParams as $key => $var){
-            if(is_array($var)){
-                $request .= '&' . $key . '=';
-                $i = 1;
-                foreach($var as $k => $v){
-                    $request .= $v . ($i < count($var) ? '|' : '');
-                    $i++;
-                }
-            }else{
-                if($var != '' && $var != 'Any'){
-                    $request .= '&' . $key . '=' . $var;
-                }
-            }
+        $params = $this->searchParams;
+		// print_r($params); die();
+
+		if(isset($params['status']) && is_array($params['status'])) {
+			$newStatus = [];
+			foreach($params['status'] as $status){
+				switch ($status) {
+					case 'Active':
+						$newStatus[] = 'Active';
+						break;
+					case 'Contingent':
+						$newStatus[] = 'Contingent|ActiveContingent|Active Contingent|Under Contract';
+						break;
+					case 'Sold':
+						$newStatus[] = 'Sold|Sold/Closed|Closed/Sold|Closed';
+						break;
+					case 'Pending':
+						$newStatus[] = 'Pending';
+						break;
+					case '':
+						$newStatus[] = '';
+					default:
+						$newStatus[] = $status;
+				}
+			}
+			$params['status'] = $newStatus;
+		}
+
+		if(isset($params['property_type'])) {
+			switch ($params['property_type']) {
+                case 'Detached Single Family':
+                    $params['property_type'] = 'House';
+                    break;
+				case 'AllHomes':
+                    $params['property_type'] = 'House|Condo|Multi|Manufactured';
+                    break;
+                case 'AllLand':
+                    $params['property_type'] = 'Land';
+                    break;
+                case 'MultiUnit':
+                    $params['property_type'] = 'Multi|Condo';
+					break;
+                case 'Commercial':
+                    $params['property_type'] = 'Commercial';
+                    break;
+				case '':
+					$params['property_type'] = '';
+					break;
+				default:
+					$params['property_type'] = $params['property_type'];
+			}
+		}
+
+        $request = [];
+        foreach($params as $key => $var){
+			$request[$key] = (is_array($var) ? implode('|',$var) : $var);
         }
 
-        // $request = $request . '&page=' . get_query_var( 'page' );
-        
-        return $request;
+        return '?' .  http_build_query($request);
     }
 
+    // V2 Deprecated
     public function createListingsPage()
     {
-        add_submenu_page( 
-            'index.php', 
-            'My Listings', 
-            'My Listings',        
-            'manage_options', 
-            'my-listings.php', 
-            [$this, 'listingsPage'] ); 
+        add_submenu_page(
+            'index.php',
+            'My Listings',
+            'My Listings',
+            'manage_options',
+            'my-listings.php',
+            [$this, 'listingsPage'] );
     }
 
+    // V2 Deprecated
     public function listingsPage()
     {
         $listings = $this->getListingStats();
         include(wp_normalize_path($this->dir . '/templates/my-listings.php'));
     }
 
-    public function getListings($hidestats = false)
+    public function getListings()
     {
-        if(!isset($this->realtorInfo['id'])){
+        if(!isset($this->realtorInfo['id']) || $this->realtorInfo['id'] == ''){
             return false;
         }
 
-        $apiCall = parent::callApi('agent-listings/' . $this->realtorInfo['id'] . '?q=' . ($hidestats ? '&nostats=true' : null) . ($this->request ? $this->makeRequest() : null));
-
+        $apiCall = parent::callApi('listings' . $this->makeRequest());
         $response = json_decode($apiCall->getBody());
 
         return $response->data;
     }
-    
+
     public function getSoldListings()
     {
-        if(!isset($this->realtorInfo['id'])){
+        if(!isset($this->realtorInfo['id']) || $this->realtorInfo['id'] == ''){
             return false;
         }
 
-        $apiCall = parent::callApi('agent-sold/' . $this->realtorInfo['id']);
+        $this->searchParams['status'] = ['Sold'];
+        $apiCall = parent::callApi('listings' . $this->makeRequest());
         $response = json_decode($apiCall->getBody());
 
         return $response->data;
     }
 
+    // Deprecated
     public function getListingStats($limit = -1)
     {
-        if(!isset($this->realtorInfo['id'])){
-            return false;
-        }
-
-        $apiCall = parent::callApi('agent-listings/' . $this->realtorInfo['id'] . '?analytics=true&nostats=true');
-        $response = json_decode($apiCall->getBody());
-
-        $listings = (count($response->data) > $limit && $limit !== -1 ? array_slice($response->data,0,$limit) : $response->data); 
-
-        return $listings;
+        return [];
     }
 
 }

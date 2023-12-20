@@ -24,7 +24,7 @@ class Listing extends Mothership
         if( $this->mlsIsGood() ){
             $this->listing = $this->getListing();
 
-            if(!isset( $this->listing->mls_account )) {
+            if(!isset( $this->listing->rets_listing_id )) {
                 return false;
             }
 
@@ -85,8 +85,8 @@ class Listing extends Mothership
         $apiCall = parent::callApi('listing/' . $this->mlsNumber);
         $response = json_decode($apiCall->getBody());
         $this->listing = $response->data;
+        // echo '<pre>', print_r($this->listing),'</pre>';
         $this->setSeo();
-
         return $this->listing;
     }
 
@@ -111,7 +111,7 @@ class Listing extends Mothership
      */
     public function setSeo()
     {
-        if(!isset($this->listing->mls_account)) {
+        if(!isset($this->listing->rets_listing_id)) {
             return null;
         }
 
@@ -181,8 +181,8 @@ class Listing extends Mothership
         echo '<meta property="og:region" content="'.$this->listing->state.'"/>';
         echo '<meta property="og:postal-code" content="'.$this->listing->zip.'"/>';
         echo '<meta property="og:country-name" content="USA"/>';
-        echo '<meta property="place:location:latitude" content="'.$this->listing->location->lat.'"/>';
-        echo '<meta property="place:location:longitude" content="'.$this->listing->location->long.'"/>';
+        echo '<meta property="place:location:latitude" content="'.$this->listing->latitude.'"/>';
+        echo '<meta property="place:location:longitude" content="'.$this->listing->longitude.'"/>';
 
         $this->ogImage();
     }
@@ -193,13 +193,13 @@ class Listing extends Mothership
      */
     public function ogImage($url = null)
     {
-        if(!isset($this->listing->media_objects->data[0]->url)) {
+        if(!isset($this->listing) || $this->listing->preferred_photo == '' ) {
             return null;
         }
 
-        $photoParts = getimagesize ( $this->listing->media_objects->data[0]->url );
-        echo '<meta property="og:image" content="' .  $this->listing->media_objects->data[0]->url . '" />' . "\n";
-        echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://', $this->listing->media_objects->data[0]->url ) . '" />' . "\n";
+        $photoParts = getimagesize ( $this->listing->preferred_photo );
+        echo '<meta property="og:image" content="' .  $this->listing->preferred_photo . '" />' . "\n";
+        echo '<meta property="og:image:secure_url" content="' .  str_replace('http://','https://' ,$this->listing->preferred_photo) . '" />' . "\n";
         echo '<meta property="og:image:width" content="' .  $photoParts['0'] . '" />' . "\n";
         echo '<meta property="og:image:height" content="' .  $photoParts['1'] . '" />' . "\n";
     }
@@ -230,28 +230,47 @@ class Listing extends Mothership
     {
 
         $address = $this->listing->full_address;
-        $price = ($this->listing->price != null ? '$' . number_format($this->listing->price) :
-            (isset($this->listing->monthly_rent) ? '$' . number_format($this->listing->monthly_rent) . ' / mo.' : ''));
+        $price = ($this->listing->list_price != null ? '$' . number_format($this->listing->list_price) :
+            (isset($this->listing->monthly_rent) && $this->listing->monthly_rent > 0 ? '$' . number_format($this->listing->monthly_rent) . ' / mo.' : ''));
         $type = $this->fixType();
         $status = $this->listing->status;
-        $area = $this->listing->area;
+        $area = $this->listing->city;
+
+		$beds = $this->listing->bedrooms;
+        $baths = $this->listing->baths_full;
+        $acreage = $this->listing->acreage;
+
+
 
         //Default title
         $title = $type . ' for sale in ' . $area .' | ' . $price;
 
-        if($status == 'Sold/Closed'){
-            $title = 'SOLD | ' . $price . ' | ' . $address;
+        if($status == 'Sold' || $status == 'Closed' || $status == 'Sold/Closed'){
+            $title = 'SOLD: ' . $price . ' | ' . $address;
         }
-        if($status == 'Contingent'){
-            $title = 'CONTINGENT | ' . $price . ' | ' . $address;
+        if($status == 'Pending'){
+            $title = 'PENDING: ' . $address;
         }
-        if($status == 'Active' && $this->listing->price != null){
-            $title = $type . ' for sale in ' . $area .' | ' . $price . ' | MLS# ' . $this->listing->mls_account;
-        }elseif(isset($this->listing->monthly_rent)){
-            $title = $type . ' for rent in ' . $area .' | ' . $price;
+        if($status == 'ActiveUnderContract' || $status == 'Active Under Contract' || $status == 'Contingent'){
+            $title = 'CONTINGENT: ' . $address;
+        }
+        if($status == 'Active' && $price != null){
+            $title = $type . ' for sale in ' . $area;
         }
 
-        return $title;
+		if($this->listing->monthly_rent > 0){
+            $title = $type . ' for rent in ' . $area .' | ' . $price . ' per month';
+        }
+
+		// if($beds > 0){
+		// 	$title .= ' | BEDS: ' . $beds;
+		// }
+
+		// if($baths > 0){
+		// 	$title .= ' | BATHS: ' . $beds;
+		// }
+
+        return $title . ' | MLS: ' . $this->mlsNumber;
     }
 
     /**
@@ -260,15 +279,14 @@ class Listing extends Mothership
      */
     public function metaDescription()
     {
-        $metaLength = 130;
-        $break = ' ';
+        $metaLength = 155;
         $pad = '...';
         $text = $this->listing->remarks;
 
-        if($metaLength < strlen($text) && ($breakpoint = strpos($text, $break, $metaLength) !== false)) {
-            if($breakpoint < strlen($text) - 1) {
-                $text = substr($text, 0, $breakpoint) . $pad;
-            }
+        if ( strlen( $text ) > $metaLength ) {
+            $text = wordwrap( $text, $metaLength );
+            $text = explode( "\n", $text, 2 );
+            $text = $text[0] . $pad;
         }
 
         return $text;
@@ -280,7 +298,7 @@ class Listing extends Mothership
      */
     public function fixType()
     {
-        $type = $this->listing->prop_type;
+        $type = $this->listing->property_type;
 
         //Change just the ones that need to be changed
         switch ($type) {

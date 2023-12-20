@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace KeriganSolutions\KMARealtor;
 
 use GuzzleHttp\Client;
@@ -6,10 +6,11 @@ use GuzzleHttp\Client;
 class Mothership
 {
     protected $base_url;
+    public $endpoint;
 
     public function __construct()
     {
-        $this->base_url = 'https://navica.kerigan.com/api/v1/';
+        $this->base_url = 'https://rets.kerigan.com/api/v2/';
     }
 
     protected function getEndpoint()
@@ -23,14 +24,13 @@ class Mothership
             'base_uri' => $this->base_url,
             'http_errors' => false
         ]);
-        
+
         try {
             $data = $client->request($method, $endpoint);
 
         }catch(GuzzleHttp\Exception\BadResponseException $e){
             echo 'Error: ', $e->getMessage(), "\n";
-            echo 'ouch!';
-            $data = '';
+            $data = false;
 
         }
 
