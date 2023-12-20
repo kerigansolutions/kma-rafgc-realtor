@@ -10,7 +10,7 @@ class Mothership
 
     public function __construct()
     {
-        $this->base_url = 'https://rets.kerigan.com/api/v2/';
+        $this->base_url = env('RETS_BASE', '');
     }
 
     protected function getEndpoint()
@@ -22,7 +22,10 @@ class Mothership
     {
         $client = new Client([
             'base_uri' => $this->base_url,
-            'http_errors' => false
+            'http_errors' => false,
+            'headers' => [
+                'X-AUTH-TOKEN' => env('RETS_API_KEY', ''),
+            ]
         ]);
 
         try {
