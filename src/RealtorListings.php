@@ -20,7 +20,6 @@ class RealtorListings extends Mothership
 
         $this->searchParams = [
             'sort' => 'date_listed|desc',
-            'agent' => isset($this->realtorInfo['id']) ? $this->realtorInfo['id'] : '',
             'status' => [
                 'active' => 'Active',
                 'contingent' => 'Contingent'
@@ -148,6 +147,7 @@ class RealtorListings extends Mothership
             return false;
         }
 
+        $this->searchParams['agent'] = $this->realtorInfo['id'];
         $apiCall = parent::callApi('listings' . $this->makeRequest());
         $response = json_decode($apiCall->getBody());
 
@@ -160,6 +160,7 @@ class RealtorListings extends Mothership
             return false;
         }
 
+        $this->searchParams['sold_agent'] = $this->realtorInfo['id'];
         $this->searchParams['status'] = ['Sold'];
         $apiCall = parent::callApi('listings' . $this->makeRequest());
         $response = json_decode($apiCall->getBody());
